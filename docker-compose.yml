@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_DATABASE: ${DB_NAME:-prueba_tecnica}
+      MYSQL_DATABASE: ${DB_NAME:-prueba_tecnica_caso1}
     ports:
       - '${DB_PORT:-3306}:3306'
     volumes:

@@ -51,11 +51,11 @@ Requisitos: Node.js 22.18+ (recomendado 24) y MySQL 8 (o Docker).
 npm install
 cp .env.example .env         # ajustar credenciales si no se usa Docker
 docker compose up -d         # MySQL 8.4 con los datos del .env
-npm run db:create            # crea la base de datos
+npm run db:create            # crea la base de datos prueba_tecnica_caso1
 npm run db:migrate           # tablas authors y books
 npm run db:seed              # 4 autores y 9 libros de ejemplo
 npm run dev                  # http://localhost:3000
-npm test                     # tests de integración (BD prueba_tecnica_test)
+npm test                     # tests de integración (BD prueba_tecnica_caso1_test)
 ```
 
 En [`api.http`](api.http) hay peticiones de ejemplo listas para usar (extensión REST Client de VS Code o IntelliJ).
