@@ -16,7 +16,8 @@
     "db:seed": "node --env-file-if-exists=.env src/shared/database/cli.ts seed",
     "db:seed:undo": "node --env-file-if-exists=.env src/shared/database/cli.ts seed:undo",
     "db:reset": "node --env-file-if-exists=.env src/shared/database/cli.ts reset",
-    "test": "node --env-file-if-exists=.env --test --test-concurrency=1 \"tests/**/*.test.ts\""
+    "pretest": "node --env-file-if-exists=.env --env-file=.env.test src/shared/database/cli.ts create && node --env-file-if-exists=.env --env-file=.env.test src/shared/database/cli.ts migrate",
+    "test": "node --env-file-if-exists=.env --env-file=.env.test --test --test-concurrency=1 \"tests/**/*.test.ts\""
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
