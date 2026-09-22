@@ -1,0 +1,105 @@
+@baseUrl = http://localhost:3000/api
+
+### HU-01 · Registro
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Laura Méndez",
+  "email": "laura@example.com",
+  "password": "Secreta#2026"
+}
+
+### HU-02 · Login — guarda el token para las siguientes peticiones
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "Password123!"
+}
+
+###
+@token = {{login.response.body.data.token}}
+
+### HU-03 · Crear cliente
+POST {{baseUrl}}/customers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Andrea Paredes",
+  "email": "andrea@example.com"
+}
+
+### HU-04 · Listar clientes (paginación, filtro por nombre, orden por fecha)
+GET {{baseUrl}}/customers?page=1&pageSize=5&name=ma&sort=asc
+Authorization: Bearer {{token}}
+
+### HU-05 · Actualizar cliente
+PATCH {{baseUrl}}/customers/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Lucía Fernández Soto"
+}
+
+### HU-06 · Eliminar cliente
+DELETE {{baseUrl}}/customers/12
+Authorization: Bearer {{token}}
+
+### HU-07 · Crear producto
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Tablet 11\"",
+  "category": "Electronics",
+  "price": 459.9
+}
+
+### HU-08 · Listar productos por categoría y precio descendente
+GET {{baseUrl}}/products?category=Books&sort=desc
+Authorization: Bearer {{token}}
+
+### HU-09 · Crear orden
+POST {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "customerId": 3,
+  "shippingAddress": "Jr. Las Flores 245, Lima",
+  "items": [
+    { "productId": 1, "quantity": 1 },
+    { "productId": 9, "quantity": 2 }
+  ]
+}
+
+### Cambiar estado de una orden
+PATCH {{baseUrl}}/orders/3
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "processing"
+}
+
+### HU-10 · Historial de órdenes de un cliente
+GET {{baseUrl}}/customers/1/orders
+Authorization: Bearer {{token}}
+
+### HU-11 · Total gastado por un cliente
+GET {{baseUrl}}/customers/1/total-spent
+Authorization: Bearer {{token}}
+
+### HU-12 · QR de un producto (PNG)
+GET {{baseUrl}}/products/1/qr
+Authorization: Bearer {{token}}
+
+### HU-12 · QR de un producto (SVG)
+GET {{baseUrl}}/products/1/qr?format=svg
+Authorization: Bearer {{token}}
