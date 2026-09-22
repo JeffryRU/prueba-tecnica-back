@@ -13,7 +13,10 @@ export function createApp() {
       .then(() => 'up')
       .catch(() => 'down')
     const healthy = database === 'up'
-    res.status(healthy ? 200 : 503).json({ status: healthy ? 'ok' : 'degraded', database })
+    res.status(healthy ? 200 : 503).json({
+      success: healthy,
+      data: { status: healthy ? 'ok' : 'degraded', database },
+    })
   })
 
   // Aquí se montan los routers de cada caso: app.use('/api/...', router)

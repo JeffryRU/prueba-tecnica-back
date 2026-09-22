@@ -102,6 +102,7 @@ npm run dev                  # http://localhost:3000
 | -------------------------- | ------------------------------------------------ |
 | `npm run dev`              | Servidor con recarga automática (`node --watch`) |
 | `npm start`                | Servidor                                         |
+| `npm test`                 | Tests (`node:test`) — requieren MySQL levantado  |
 | `npm run typecheck`        | Verificación de tipos con `tsc`                  |
 | `npm run format`           | Formatea con Prettier                            |
 | `npm run db:create`        | Crea la base de datos indicada en `DB_NAME`      |
@@ -128,8 +129,12 @@ src/
     │   ├── cli.ts            # comandos db:*
     │   ├── migrations/       # YYYYMMDDHHmm-nombre.ts  → export up / down
     │   └── seeders/
-    ├── errors/HttpError.ts   # errores controlados (400, 401, 403, 404, 409)
-    └── http/errorHandler.ts  # 404 + traducción de errores (Zod, Sequelize, JSON) → HTTP
+    ├── errors/AppError.ts    # errores controlados con código + estado HTTP
+    └── http/
+        ├── response.ts       # sobre común { success, data, message, error }
+        ├── pagination.ts     # ?page=&pageSize= y resultado paginado
+        ├── params.ts         # validación de :id
+        └── errorHandler.ts   # 404 + traducción de errores (Zod, Sequelize, JSON) → HTTP
 ```
 
 ---

@@ -5,54 +5,50 @@ import {
   ValidationError as SequelizeValidationError,
 } from 'sequelize'
 import { ZodError } from 'zod'
-import { HttpError } from '../errors/HttpError.ts'
+import { AppError } from '../errors/AppError.ts'
+import { fail } from './response.ts'
 
 export const notFoundHandler: RequestHandler = (req) => {
-  throw HttpError.notFound(`Ruta no encontrada: ${req.method} ${req.originalUrl}`)
+  throw AppError.notFound(`Ruta no encontrada: ${req.method} ${req.originalUrl}`, 'ROUTE_NOT_FOUND')
 }
 
+/** Traduce cualquier error lanzado en la app a una respuesta HTTP con el sobre común. */
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
-  if (error instanceof HttpError) {
-    res.status(error.status).json({ message: error.message, details: error.details })
-    return
-  }
+  fail(res, toAppError(error))
+}
+
+function toAppError(error: unknown): AppError {
+  if (error instanceof AppError) return error
 
   if (error instanceof ZodError) {
-    res.status(400).json({
-      message: 'Datos de entrada inválidos',
-      details: error.issues.map(({ path, message }) => ({ field: path.join('.'), message })),
-    })
-    return
+    return AppError.validation(
+      error.issues.map(({ path, message }) => ({ field: path.join('.'), message })),
+    )
   }
 
   // Debe ir antes que SequelizeValidationError porque hereda de ella
   if (error instanceof UniqueConstraintError) {
-    res.status(409).json({
-      message: 'Ya existe un registro con esos datos',
-      details: error.errors.map(({ path, message }) => ({ field: path, message })),
-    })
-    return
+    return new AppError(
+      'DUPLICATE_ENTRY',
+      'Ya existe un registro con esos datos',
+      409,
+      error.errors.map(({ path, message }) => ({ field: path, message })),
+    )
   }
 
   if (error instanceof SequelizeValidationError) {
-    res.status(400).json({
-      message: 'Datos inválidos',
-      details: error.errors.map(({ path, message }) => ({ field: path, message })),
-    })
-    return
+    return AppError.validation(error.errors.map(({ path, message }) => ({ field: path, message })))
   }
 
   if (error instanceof ForeignKeyConstraintError) {
-    res.status(409).json({ message: 'La referencia a otro registro no es válida' })
-    return
+    return new AppError('INVALID_REFERENCE', 'La referencia a otro registro no es válida', 409)
   }
 
-  // JSON mal formado en el body
+  // JSON mal formado en el body (lanzado por express.json)
   if (error instanceof SyntaxError && 'body' in error) {
-    res.status(400).json({ message: 'El cuerpo de la petición no es un JSON válido' })
-    return
+    return AppError.badRequest('El cuerpo de la petición no es un JSON válido')
   }
 
   console.error(error)
-  res.status(500).json({ message: 'Error interno del servidor' })
+  return AppError.internal()
 }
