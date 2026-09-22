@@ -1,0 +1,69 @@
+@baseUrl = http://localhost:3000/api
+
+### Listar libros con su autor (HU-02)
+GET {{baseUrl}}/books
+
+### Listar libros de un autor
+GET {{baseUrl}}/books?authorId=1
+
+### Detalle de un libro (HU-03)
+GET {{baseUrl}}/books/1
+
+### Crear libro (HU-01)
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "title": "Relato de un náufrago",
+  "description": "Diez días a la deriva en una balsa.",
+  "price": 32.5,
+  "authorId": 1
+}
+
+### Reemplazar libro (HU-04)
+PUT {{baseUrl}}/books/1
+Content-Type: application/json
+
+{
+  "title": "Cien años de soledad (edición conmemorativa)",
+  "description": "La historia de la familia Buendía en Macondo.",
+  "price": 79.9,
+  "authorId": 1
+}
+
+### Actualizar parcialmente / cambiar de autor (HU-04)
+PATCH {{baseUrl}}/books/1
+Content-Type: application/json
+
+{
+  "authorId": 2
+}
+
+### Eliminar libro (HU-05)
+DELETE {{baseUrl}}/books/1
+
+### Listar autores
+GET {{baseUrl}}/authors
+
+### Detalle de autor con sus libros
+GET {{baseUrl}}/authors/1
+
+### Crear autor
+POST {{baseUrl}}/authors
+Content-Type: application/json
+
+{
+  "name": "Jorge Luis Borges",
+  "email": "borges@example.com"
+}
+
+### Actualizar autor
+PATCH {{baseUrl}}/authors/1
+Content-Type: application/json
+
+{
+  "name": "Gabriel José García Márquez"
+}
+
+### Eliminar autor (elimina sus libros en cascada)
+DELETE {{baseUrl}}/authors/4
