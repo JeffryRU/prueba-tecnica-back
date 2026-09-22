@@ -4,16 +4,35 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "node main.ts",
-    "dev": "nodemon main.ts"
+    "start": "node --env-file-if-exists=.env main.ts",
+    "dev": "node --watch --env-file-if-exists=.env main.ts",
+    "typecheck": "tsc",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:create": "node --env-file-if-exists=.env src/shared/database/cli.ts create",
+    "db:migrate": "node --env-file-if-exists=.env src/shared/database/cli.ts migrate",
+    "db:migrate:undo": "node --env-file-if-exists=.env src/shared/database/cli.ts migrate:undo",
+    "db:migrate:reset": "node --env-file-if-exists=.env src/shared/database/cli.ts migrate:reset",
+    "db:seed": "node --env-file-if-exists=.env src/shared/database/cli.ts seed",
+    "db:seed:undo": "node --env-file-if-exists=.env src/shared/database/cli.ts seed:undo",
+    "db:reset": "node --env-file-if-exists=.env src/shared/database/cli.ts reset",
+    "pretest": "node --env-file-if-exists=.env --env-file=.env.test src/shared/database/cli.ts create && node --env-file-if-exists=.env --env-file=.env.test src/shared/database/cli.ts migrate",
+    "test": "node --env-file-if-exists=.env --env-file=.env.test --test --test-concurrency=1 \"tests/**/*.test.ts\""
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2",
+    "@types/node": "^24.13.6",
+    "prettier": "^3.9.8",
     "typescript": "~5.9.3"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mysql2": "^3.24.4",
+    "sequelize": "^6.37.8",
+    "umzug": "^3.8.3",
+    "zod": "^4.6.5"
+  },
+  "engines": {
+    "node": ">=22.18"
   }
 }
