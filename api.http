@@ -1,0 +1,71 @@
+@baseUrl = http://localhost:3000/api
+
+### Registro (HU-01)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Diego Pérez",
+  "email": "diego@example.com",
+  "password": "Secreta#2026"
+}
+
+### Login (HU-02) — guarda el token para las siguientes peticiones
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "password": "Password123!"
+}
+
+###
+@token = {{login.response.body.data.token}}
+
+### Perfil
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Usuarios
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### Crear post (HU-03)
+POST {{baseUrl}}/posts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Mi primer post",
+  "content": "Hola desde la API."
+}
+
+### Listar con paginación (HU-04)
+GET {{baseUrl}}/posts?page=1&pageSize=5
+Authorization: Bearer {{token}}
+
+### Filtrar por usuario (HU-05)
+GET {{baseUrl}}/posts?userId=2
+Authorization: Bearer {{token}}
+
+### Mis posts (HU-06)
+GET {{baseUrl}}/posts?mine=true
+Authorization: Bearer {{token}}
+
+### Ordenar por fecha de creación ascendente (HU-07)
+GET {{baseUrl}}/posts?sort=asc
+Authorization: Bearer {{token}}
+
+### Actualizar post propio (HU-08)
+PATCH {{baseUrl}}/posts/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Título actualizado"
+}
+
+### Eliminar post propio (HU-08)
+DELETE {{baseUrl}}/posts/1
+Authorization: Bearer {{token}}
