@@ -54,6 +54,9 @@ export function useTestServer() {
       request<T>('PATCH', path, { ...options, body }),
     delete: <T = any>(path: string, options?: RequestOptions) =>
       request<T>('DELETE', path, options),
+    /** Petición GET sin parsear la respuesta (imágenes, archivos…). */
+    raw: (path: string, token?: string) =>
+      fetch(baseUrl + path, { headers: token ? { authorization: `Bearer ${token}` } : {} }),
   }
 }
 
