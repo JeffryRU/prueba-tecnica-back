@@ -5,6 +5,13 @@ import {
   ValidationError as SequelizeValidationError,
 } from 'sequelize'
 import { ZodError } from 'zod'
+import {
+  ConflictError,
+  DomainError,
+  InvalidArgumentError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../domain/DomainError.ts'
 import { AppError } from '../errors/AppError.ts'
 import { fail } from './response.ts'
 
@@ -17,8 +24,21 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   fail(res, toAppError(error))
 }
 
+/** Estado HTTP de cada categoría de error de dominio. */
+const domainErrorStatus = new Map<Function, number>([
+  [InvalidArgumentError, 400],
+  [UnauthorizedError, 401],
+  [NotFoundError, 404],
+  [ConflictError, 409],
+])
+
 function toAppError(error: unknown): AppError {
   if (error instanceof AppError) return error
+
+  if (error instanceof DomainError) {
+    const status = domainErrorStatus.get(error.constructor) ?? 400
+    return new AppError(error.code, error.message, status)
+  }
 
   if (error instanceof ZodError) {
     return AppError.validation(
