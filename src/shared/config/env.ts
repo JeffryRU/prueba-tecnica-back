@@ -13,6 +13,11 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+  JWT_SECRET: z.string().min(16, 'JWT_SECRET debe tener al menos 16 caracteres'),
+  JWT_EXPIRES_IN: z
+    .string()
+    .regex(/^\d+[smhd]$/, 'Formato esperado: 15m, 1h, 7d…')
+    .default('1h'),
 })
 
 const parsed = envSchema.safeParse(process.env)
