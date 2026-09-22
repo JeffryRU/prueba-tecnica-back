@@ -1,4 +1,5 @@
 import express from 'express'
+import { apiRouter } from './routes.ts'
 import { sequelize } from './shared/database/sequelize.ts'
 import { errorHandler, notFoundHandler } from './shared/http/errorHandler.ts'
 
@@ -19,7 +20,7 @@ export function createApp() {
     })
   })
 
-  // Aquí se montan los routers de cada caso: app.use('/api/...', router)
+  app.use('/api', apiRouter())
 
   app.use(notFoundHandler)
   app.use(errorHandler)
