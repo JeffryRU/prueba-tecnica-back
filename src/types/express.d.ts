@@ -1,4 +1,4 @@
-import type { AuthUser } from '../modules/auth/token.service.ts'
+import type { AuthUser } from '../IdentityAndAccess/User/Domain/Contract/TokenService.ts'
 
 declare global {
   namespace Express {
