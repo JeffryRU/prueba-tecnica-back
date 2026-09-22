@@ -30,7 +30,12 @@ function createRunner(folder: string, modelName: string) {
     },
     context: sequelize.getQueryInterface(),
     storage: new SequelizeStorage({ sequelize, modelName }),
-    logger: console,
+    logger: {
+      info: ({ event, name }) => console.log(`✔ ${event} ${name ?? ''}`),
+      warn: console.warn,
+      error: console.error,
+      debug: () => {},
+    },
   })
 }
 
