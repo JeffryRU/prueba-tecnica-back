@@ -6,17 +6,18 @@ Solución a la evaluación práctica de Express de InversionesBullbet: tres caso
 
 ## Stack
 
-| Tecnología | Uso |
-|---|---|
-| Node.js 24 + TypeScript | Ejecución directa de `.ts` (*type stripping* nativo de Node, sin compilación) |
-| Express 5 | Servidor HTTP (propaga errores de handlers `async` de forma nativa) |
-| MySQL 8 + Sequelize 6 | Base de datos y ORM |
-| Umzug | Migraciones y seeders escritos en TypeScript |
-| Zod | Validación de peticiones y variables de entorno |
-| JWT + bcrypt | Autenticación (casos 2 y 3) |
+| Tecnología              | Uso                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| Node.js 24 + TypeScript | Ejecución directa de `.ts` (_type stripping_ nativo de Node, sin compilación) |
+| Express 5               | Servidor HTTP (propaga errores de handlers `async` de forma nativa)           |
+| MySQL 8 + Sequelize 6   | Base de datos y ORM                                                           |
+| Umzug                   | Migraciones y seeders escritos en TypeScript                                  |
+| Zod                     | Validación de peticiones y variables de entorno                               |
+| JWT + bcrypt            | Autenticación (casos 2 y 3)                                                   |
 
 **Restricciones del `tsconfig` original que condicionan el código:**
-- `erasableSyntaxOnly`: no se pueden usar `enum`, `namespace`, *parameter properties* (`constructor(private repo: X)`) ni decoradores. Se usan uniones de literales / objetos `as const` y campos declarados de forma explícita.
+
+- `erasableSyntaxOnly`: no se pueden usar `enum`, `namespace`, _parameter properties_ (`constructor(private repo: X)`) ni decoradores. Se usan uniones de literales / objetos `as const` y campos declarados de forma explícita.
 - Imports con extensión `.ts` (`import { x } from './x.ts'`), porque Node ejecuta los archivos tal cual.
 
 ## Estrategia de ramas
@@ -34,6 +35,7 @@ Los casos son **proyectos independientes** (entidades y arquitecturas distintas)
 ## Plan por caso
 
 ### Caso 1 – CRUD básico · rama `ejercicio-1`
+
 Entidades **Autor** (1) → **Libro** (N), con eliminación en cascada.
 
 - [ ] Migraciones de `authors` y `books` con restricciones (`NOT NULL`, email único, FK `ON DELETE CASCADE`).
@@ -45,6 +47,7 @@ Entidades **Autor** (1) → **Libro** (N), con eliminación en cascada.
 - [ ] Arquitectura en capas: rutas → controladores → servicios → modelos.
 
 ### Caso 2 – CRUD con autenticación · rama `ejercicio-2`
+
 Entidades **Usuario** (1) → **Post** (N), con eliminación en cascada.
 
 - [ ] Registro (HU-01) y login (HU-02) con JWT; contraseñas con hash bcrypt.
@@ -57,6 +60,7 @@ Entidades **Usuario** (1) → **Post** (N), con eliminación en cascada.
 - [ ] Migraciones y seeders.
 
 ### Caso 3 – Arquitectura Hexagonal + DDD · rama `ejercicio-3`
+
 Bounded contexts: **IdentityAndAccess**, **CustomerManagement**, **ProductManagement**, **OrderManagement**, cada uno con sus capas `Domain` / `Application` / `Infrastructure`.
 
 - [ ] IAM: registro e inicio de sesión con JWT; todas las rutas protegidas (HU-01, HU-02).
@@ -66,23 +70,66 @@ Bounded contexts: **IdentityAndAccess**, **CustomerManagement**, **ProductManage
 - [ ] Historial de órdenes de un cliente con productos, cantidades y precios (HU-10).
 - [ ] Total gastado por un cliente: Σ (precio unitario × cantidad) de todas sus órdenes (HU-11).
 - [ ] Código QR por producto que muestra sus datos al escanearlo (HU-12).
-- [ ] Contratos (interfaces) en el dominio e implementaciones Sequelize en infraestructura; *value objects* para email, precio, categoría y estado.
+- [ ] Contratos (interfaces) en el dominio e implementaciones Sequelize en infraestructura; _value objects_ para email, precio, categoría y estado.
 - [ ] Migraciones y seeders.
 
 **Decisiones sobre inconsistencias del enunciado del caso 3:**
+
 - `EloquentProductRepository` y `Routes/api.ts` (nombres de Laravel) → se usan `SequelizeProductRepository` y `Routes/Router.ts`, igual que en los demás contextos.
 - El estado de la orden tiene como valor por defecto `"Pending"`, pero la lista de valores está en minúsculas → se usan minúsculas (`pending`, `processing`, `completed`, `declined`) con `pending` por defecto.
-- `orders.total` es *nullable* → se calcula y guarda al crear la orden. El total gastado por cliente se calcula siempre desde los `order_items`.
+- `orders.total` es _nullable_ → se calcula y guarda al crear la orden. El total gastado por cliente se calcula siempre desde los `order_items`.
 
 ## Requisitos y ejecución
 
-Las instrucciones detalladas de instalación, base de datos y scripts están en el README de `develop` y de cada rama `ejercicio-N`.
+- Node.js **22.18+** (recomendado 24), que ejecuta TypeScript de forma nativa.
+- MySQL 8: con Docker (`docker compose up -d`) o una instalación local.
 
 ```bash
 git clone https://github.com/JeffryRU/prueba-tecnica-back.git
 cd prueba-tecnica-back
-git checkout ejercicio-1   # o ejercicio-2 / ejercicio-3
+git checkout ejercicio-1     # o ejercicio-2 / ejercicio-3
 npm install
+cp .env.example .env         # ajustar credenciales de MySQL
+
+docker compose up -d         # opcional: levanta MySQL con los datos del .env
+npm run db:create            # crea la base de datos si no existe
+npm run db:migrate           # ejecuta las migraciones
+npm run db:seed              # carga los datos de ejemplo
+npm run dev                  # http://localhost:3000
+```
+
+| Script                     | Descripción                                      |
+| -------------------------- | ------------------------------------------------ |
+| `npm run dev`              | Servidor con recarga automática (`node --watch`) |
+| `npm start`                | Servidor                                         |
+| `npm run typecheck`        | Verificación de tipos con `tsc`                  |
+| `npm run format`           | Formatea con Prettier                            |
+| `npm run db:create`        | Crea la base de datos indicada en `DB_NAME`      |
+| `npm run db:migrate`       | Ejecuta las migraciones pendientes               |
+| `npm run db:migrate:undo`  | Revierte la última migración                     |
+| `npm run db:migrate:reset` | Revierte todas las migraciones                   |
+| `npm run db:seed`          | Ejecuta los seeders pendientes                   |
+| `npm run db:seed:undo`     | Revierte todos los seeders                       |
+| `npm run db:reset`         | Revierte todo y vuelve a migrar y sembrar        |
+
+`GET /health` indica si el servidor está en marcha y si hay conexión con la base de datos.
+
+### Estructura base (`develop`)
+
+```
+main.ts                       # arranque: conecta a MySQL y levanta el servidor
+src/
+├── app.ts                    # crea la app de Express (middlewares, rutas, errores)
+└── shared/
+    ├── config/env.ts         # variables de entorno validadas con Zod
+    ├── database/
+    │   ├── sequelize.ts      # conexión Sequelize
+    │   ├── umzug.ts          # runners de migraciones y seeders
+    │   ├── cli.ts            # comandos db:*
+    │   ├── migrations/       # YYYYMMDDHHmm-nombre.ts  → export up / down
+    │   └── seeders/
+    ├── errors/HttpError.ts   # errores controlados (400, 401, 403, 404, 409)
+    └── http/errorHandler.ts  # 404 + traducción de errores (Zod, Sequelize, JSON) → HTTP
 ```
 
 ---
